@@ -25,6 +25,8 @@ public class Login implements Initializable {
 	
 	// * 로그인 성공한 회원객체 [ static 사용하는이유 : 다른 클래스에서 호출하기 위해 ] 
 	public static Member member;
+
+	public static Object txtmsg;
 	
 	@FXML
 	private MediaView mediaview;// fxid

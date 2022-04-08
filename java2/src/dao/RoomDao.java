@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import dto.Room;
+import dto.Roomlive;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
@@ -22,7 +24,7 @@ public class RoomDao {
 	public RoomDao() {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			con = DriverManager.getConnection("jdbc:mysql://localhost:3307/javafx?serverTimezone=UTC",
+			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/javafx?serverTimezone=UTC",
 					"root","1234");
 		}catch(Exception e ) {}
 	}
@@ -77,7 +79,85 @@ public class RoomDao {
 		
 	}
 	
-}
+	//4.채팅방 접속 명단 추가
+	
+	public boolean addroomlive(Roomlive roomlive) {
+		String sql = "insert into roomlive(ronum,mid)values(?,?)";
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt( 1 , roomlive.getRonum() );
+			ps.setString( 2 , roomlive.getMid() );
+			ps.executeUpdate();
+			return true;
+			
+		} catch (Exception e) {System.out.println("sql 오류" + e) ;}
+		return false;
+	}
+	//5. 채팅방 접속된 모든 명단 호출
+	public ArrayList<Roomlive> getRoomlivelist(int ronum){
+		ArrayList<Roomlive> roomlivelist = new ArrayList<>();
+		try {
+			
+			String sql = "select * from roomlive where ronum=?";
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, ronum);
+			rs=ps.executeQuery();
+			while(rs.next()) {
+				Roomlive roomlive = new Roomlive(
+						rs.getInt(1),
+						rs.getInt(2),
+						rs.getString(3));
+				roomlivelist.add(roomlive);
+				
+			}
+			return roomlivelist;
+
+		} catch (Exception e) {System.out.println("sql 오류" + e) ;}
+			return null;
+	}
+	
+	//6. 채팅방 접속 명단 삭제
+	public boolean roomlivedelete(String mid) {
+		String sql = "delete from roomlive";
+		try {
+			ps= con.prepareStatement(sql);
+			ps.setString(1, mid);
+			ps.executeUpdate();
+			
+			return true;
+			
+		} catch (Exception e) {System.out.println("sql 오류" + e) ; 	
+		return false;}
+	}
+		
+		public boolean roomdelete(int ronum) {
+			
+			//만약에 해당 방번호로 roomlive에서 검색했을때
+			String sql = "select * from roomlive where ronum =?";
+			try {
+				
+				ps= con.prepareStatement(sql);
+				ps.setInt(1, ronum);
+				rs =ps.executeQuery();
+				if( rs.next() ) {// 검색결과가 존재 ( 레코드가존재)하면 방삭제x
+					return false;
+				}else { //결과가 없으면 방삭제 처리
+					String sql2 = "delete from roomlive where ronum =?";
+					ps= con.prepareStatement(sql);
+					ps.setInt(1, ronum);
+					ps.executeUpdate();
+					return true;
+				}
+				
+				
+			} catch (Exception e) {System.out.println("sql 오류" + e) ; 	}
+			return false;
+		}
+		
+		
+	 }
+ 
+
 
 
 
